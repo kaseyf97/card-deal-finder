@@ -76,21 +76,26 @@ function renderResults(items, total, query) {
   resultsGrid.innerHTML = items.map(item => `
     <div class="card">
       <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">
-        <img
-          class="card-img"
-          src="${escapeHtml(item.image || '')}"
-          alt="${escapeHtml(item.title)}"
-          loading="lazy"
-          onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%2250%%22 x=%2250%%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2214%22 fill=%22%236b7280%22>No Image</text></svg>'"
-        >
+        <div class="card-img-wrap">
+          <img
+            class="card-img"
+            src="${escapeHtml(item.image || '')}"
+            alt="${escapeHtml(item.title)}"
+            loading="lazy"
+            onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%2250%%22 x=%2250%%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2212%22 fill=%22%23475569%22>No Image</text></svg>'"
+          >
+        </div>
         <div class="card-body">
           <div class="card-title">${escapeHtml(item.title)}</div>
           <div class="card-price">$${formatPrice(item.price)}</div>
-          <div class="card-meta">
-            <span>${escapeHtml(item.condition || '')}</span>
-            <span>${item.seller ? escapeHtml(item.seller) : ''}${item.sellerScore ? ` <span class="seller-score">${item.sellerScore}%</span>` : ''}</span>
+          <div class="card-footer">
+            <span class="card-condition">${escapeHtml(item.condition || 'N/A')}</span>
+            <span class="card-seller">
+              ${item.sellerScore ? `<span class="seller-score">${item.sellerScore}%</span>` : ''}
+            </span>
           </div>
         </div>
+        <span class="card-view-btn">View on eBay →</span>
       </a>
     </div>
   `).join('');

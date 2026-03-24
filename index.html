@@ -5,67 +5,121 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Card Deal Finder</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+
+  <!-- Background ambient glow orbs -->
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+
   <header>
-    <h1>Card Deal Finder</h1>
-    <p class="subtitle">Find underpriced SSPs on eBay</p>
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">◈</span>
+        <div>
+          <h1>Card Deal Finder</h1>
+          <p class="subtitle">Hunt underpriced SSPs on eBay</p>
+        </div>
+      </div>
+      <div class="header-badge">Live Market Data</div>
+    </div>
   </header>
 
   <main>
-    <!-- Search Form -->
+
+    <!-- Hero Search -->
     <section class="search-section">
       <form id="search-form">
-        <div class="search-row">
-          <input type="text" id="query" placeholder="e.g. 2024 Panini Downtown Mahomes" required>
-          <button type="submit" id="search-btn">Search</button>
+        <div class="search-bar">
+          <span class="search-icon">⌕</span>
+          <input type="text" id="query" placeholder="Search for any card — e.g. 2024 Panini Downtown Mahomes" required autocomplete="off">
+          <button type="submit" id="search-btn">
+            <span class="btn-text">Search</span>
+            <span class="btn-arrow">→</span>
+          </button>
         </div>
+
         <div class="filters-row">
-          <div class="filter">
-            <label for="max-price">Max Price ($)</label>
-            <input type="number" id="max-price" placeholder="Any" min="1" step="1">
+          <div class="filter-chip">
+            <label for="max-price">Max Price</label>
+            <div class="filter-input-wrap">
+              <span class="input-prefix">$</span>
+              <input type="number" id="max-price" placeholder="Any" min="1" step="1">
+            </div>
           </div>
-          <div class="filter">
+          <div class="filter-chip">
             <label for="sport">Sport</label>
             <select id="sport">
               <option value="">All Sports</option>
-              <option value="basketball">Basketball</option>
-              <option value="football">Football</option>
-              <option value="baseball">Baseball</option>
+              <option value="basketball">🏀 Basketball</option>
+              <option value="football">🏈 Football</option>
+              <option value="baseball">⚾ Baseball</option>
             </select>
           </div>
         </div>
       </form>
 
-      <!-- Quick Search Buttons -->
+      <!-- Quick Searches -->
       <div class="quick-searches">
-        <span class="quick-label">Quick:</span>
-        <button class="quick-btn" data-query="2024 Panini Downtown football" data-sport="football">Downtown Football</button>
-        <button class="quick-btn" data-query="2024 Panini Downtown basketball" data-sport="basketball">Downtown Basketball</button>
-        <button class="quick-btn" data-query="2024 Topps Color Blast baseball" data-sport="baseball">Color Blast Baseball</button>
-        <button class="quick-btn" data-query="2024 Panini Uptown" data-sport="">Uptown</button>
-        <button class="quick-btn" data-query="2024 Panini kaboom basketball" data-sport="basketball">Kaboom Basketball</button>
-        <button class="quick-btn" data-query="2024 Panini Downtown Wembanyama" data-sport="basketball">Downtown Wemby</button>
+        <span class="quick-label">Hot searches</span>
+        <div class="quick-btns">
+          <button class="quick-btn" data-query="2024 Panini Downtown football" data-sport="football">
+            <span class="qb-dot football"></span>Downtown Football
+          </button>
+          <button class="quick-btn" data-query="2024 Panini Downtown basketball" data-sport="basketball">
+            <span class="qb-dot basketball"></span>Downtown Basketball
+          </button>
+          <button class="quick-btn" data-query="2024 Topps Color Blast baseball" data-sport="baseball">
+            <span class="qb-dot baseball"></span>Color Blast Baseball
+          </button>
+          <button class="quick-btn" data-query="2024 Panini Uptown" data-sport="">
+            <span class="qb-dot all"></span>Uptown
+          </button>
+          <button class="quick-btn" data-query="2024 Panini kaboom basketball" data-sport="basketball">
+            <span class="qb-dot basketball"></span>Kaboom Basketball
+          </button>
+          <button class="quick-btn" data-query="2024 Panini Downtown Wembanyama" data-sport="basketball">
+            <span class="qb-dot basketball"></span>Downtown Wemby
+          </button>
+        </div>
       </div>
     </section>
 
     <!-- Results -->
     <section class="results-section">
       <div id="results-header" class="hidden">
-        <span id="results-count"></span>
-        <span id="results-query"></span>
+        <div class="results-meta">
+          <span id="results-count"></span>
+          <span id="results-query"></span>
+        </div>
+        <div class="results-note">Sorted cheapest first · Buy It Now only</div>
       </div>
-      <div id="loading" class="hidden">Searching eBay...</div>
+
+      <div id="loading" class="hidden">
+        <div class="loading-inner">
+          <div class="spinner"></div>
+          <span>Scanning eBay listings…</span>
+        </div>
+      </div>
+
       <div id="error" class="hidden"></div>
       <div id="results-grid" class="card-grid"></div>
-      <div id="no-results" class="hidden">No listings found. Try different keywords or a higher max price.</div>
+      <div id="no-results" class="hidden">
+        <div class="no-results-inner">
+          <span class="no-results-icon">◎</span>
+          <p>No listings found. Try different keywords or raise your max price.</p>
+        </div>
+      </div>
     </section>
   </main>
 
   <footer>
-    <p>Prices from eBay Buy It Now listings &middot; Not affiliated with eBay, Panini, or Topps</p>
+    <div class="footer-inner">
+      <span class="footer-logo">◈ Card Deal Finder</span>
+      <span>Prices from eBay BIN listings · Not affiliated with eBay, Panini, or Topps</span>
+    </div>
   </footer>
 
   <script src="app.js"></script>
