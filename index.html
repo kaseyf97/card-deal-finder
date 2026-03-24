@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Card Deal Finder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>Card Deal Finder</h1>
+    <p class="subtitle">Find underpriced SSPs on eBay</p>
+  </header>
+
+  <main>
+    <!-- Search Form -->
+    <section class="search-section">
+      <form id="search-form">
+        <div class="search-row">
+          <input type="text" id="query" placeholder="e.g. 2024 Panini Downtown Mahomes" required>
+          <button type="submit" id="search-btn">Search</button>
+        </div>
+        <div class="filters-row">
+          <div class="filter">
+            <label for="max-price">Max Price ($)</label>
+            <input type="number" id="max-price" placeholder="Any" min="1" step="1">
+          </div>
+          <div class="filter">
+            <label for="sport">Sport</label>
+            <select id="sport">
+              <option value="">All Sports</option>
+              <option value="basketball">Basketball</option>
+              <option value="football">Football</option>
+              <option value="baseball">Baseball</option>
+            </select>
+          </div>
+        </div>
+      </form>
+
+      <!-- Quick Search Buttons -->
+      <div class="quick-searches">
+        <span class="quick-label">Quick:</span>
+        <button class="quick-btn" data-query="2024 Panini Downtown football" data-sport="football">Downtown Football</button>
+        <button class="quick-btn" data-query="2024 Panini Downtown basketball" data-sport="basketball">Downtown Basketball</button>
+        <button class="quick-btn" data-query="2024 Topps Color Blast baseball" data-sport="baseball">Color Blast Baseball</button>
+        <button class="quick-btn" data-query="2024 Panini Uptown" data-sport="">Uptown</button>
+        <button class="quick-btn" data-query="2024 Panini kaboom basketball" data-sport="basketball">Kaboom Basketball</button>
+        <button class="quick-btn" data-query="2024 Panini Downtown Wembanyama" data-sport="basketball">Downtown Wemby</button>
+      </div>
+    </section>
+
+    <!-- Results -->
+    <section class="results-section">
+      <div id="results-header" class="hidden">
+        <span id="results-count"></span>
+        <span id="results-query"></span>
+      </div>
+      <div id="loading" class="hidden">Searching eBay...</div>
+      <div id="error" class="hidden"></div>
+      <div id="results-grid" class="card-grid"></div>
+      <div id="no-results" class="hidden">No listings found. Try different keywords or a higher max price.</div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Prices from eBay Buy It Now listings &middot; Not affiliated with eBay, Panini, or Topps</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

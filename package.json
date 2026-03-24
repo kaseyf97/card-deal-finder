@@ -1,0 +1,6 @@
+{
+  "name": "card-deal-finder",
+  "version": "1.0.0",
+  "description": "Find underpriced trading card SSPs on eBay",
+  "private": true
+}

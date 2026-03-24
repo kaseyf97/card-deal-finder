@@ -1,0 +1,98 @@
+[
+  {
+    "id": "dt-football-2024",
+    "name": "Downtown Football 2024",
+    "query": "2024 Panini Downtown football",
+    "sport": "football",
+    "maxPrice": 200,
+    "enabled": true
+  },
+  {
+    "id": "dt-basketball-2024",
+    "name": "Downtown Basketball 2024",
+    "query": "2024 Panini Downtown basketball",
+    "sport": "basketball",
+    "maxPrice": 200,
+    "enabled": true
+  },
+  {
+    "id": "dt-wemby-2024",
+    "name": "Downtown Wembanyama 2024",
+    "query": "2024 Panini Downtown Wembanyama",
+    "sport": "basketball",
+    "maxPrice": 500,
+    "enabled": true
+  },
+  {
+    "id": "dt-mahomes-2024",
+    "name": "Downtown Mahomes 2024",
+    "query": "2024 Panini Downtown Patrick Mahomes",
+    "sport": "football",
+    "maxPrice": 200,
+    "enabled": true
+  },
+  {
+    "id": "cb-baseball-2024",
+    "name": "Color Blast Baseball 2024",
+    "query": "2024 Topps Color Blast baseball",
+    "sport": "baseball",
+    "maxPrice": 300,
+    "enabled": true
+  },
+  {
+    "id": "cb-ohtani-2024",
+    "name": "Color Blast Ohtani 2024",
+    "query": "2024 Topps Color Blast Ohtani",
+    "sport": "baseball",
+    "maxPrice": 500,
+    "enabled": true
+  },
+  {
+    "id": "ut-football-2024",
+    "name": "Uptown Football 2024",
+    "query": "2024 Panini Uptown football",
+    "sport": "football",
+    "maxPrice": 150,
+    "enabled": true
+  },
+  {
+    "id": "ut-basketball-2024",
+    "name": "Uptown Basketball 2024",
+    "query": "2024 Panini Uptown basketball",
+    "sport": "basketball",
+    "maxPrice": 150,
+    "enabled": true
+  },
+  {
+    "id": "kaboom-basketball-2024",
+    "name": "Kaboom Basketball 2024",
+    "query": "2024 Panini Kaboom basketball",
+    "sport": "basketball",
+    "maxPrice": 250,
+    "enabled": true
+  },
+  {
+    "id": "dt-lamar-2024",
+    "name": "Downtown Lamar Jackson 2024",
+    "query": "2024 Panini Downtown Lamar Jackson",
+    "sport": "football",
+    "maxPrice": 150,
+    "enabled": true
+  },
+  {
+    "id": "dt-baseball-2024",
+    "name": "Downtown Baseball 2024",
+    "query": "2024 Panini Downtown baseball",
+    "sport": "baseball",
+    "maxPrice": 200,
+    "enabled": true
+  },
+  {
+    "id": "cb-basketball-2024",
+    "name": "Color Blast Basketball 2024",
+    "query": "2024 Panini Color Blast basketball",
+    "sport": "basketball",
+    "maxPrice": 300,
+    "enabled": true
+  }
+]
