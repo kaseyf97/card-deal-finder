@@ -87,6 +87,39 @@
       </div>
     </section>
 
+    <!-- Watchlist -->
+    <section class="watchlist-section">
+      <div class="section-header">
+        <div class="section-title">
+          <span class="section-icon">◉</span>
+          <h2>My Watchlist</h2>
+          <span id="watchlist-count" class="section-count"></span>
+        </div>
+        <button id="add-watch-btn" class="add-watch-btn">+ Add Card</button>
+      </div>
+
+      <!-- Add form (hidden by default) -->
+      <div id="add-watch-form" class="add-watch-form hidden">
+        <input type="text" id="watch-name" placeholder="Name (e.g. Downtown Mahomes 2024)" maxlength="100">
+        <input type="text" id="watch-query" placeholder="eBay search query" maxlength="200">
+        <select id="watch-sport">
+          <option value="">All Sports</option>
+          <option value="basketball">🏀 Basketball</option>
+          <option value="football">🏈 Football</option>
+          <option value="baseball">⚾ Baseball</option>
+        </select>
+        <div class="watch-price-wrap">
+          <span>$</span>
+          <input type="number" id="watch-price" placeholder="Max price" min="1">
+        </div>
+        <button id="save-watch-btn" class="save-watch-btn">Save</button>
+        <button id="cancel-watch-btn" class="cancel-watch-btn">Cancel</button>
+      </div>
+
+      <div id="watchlist-loading" class="watchlist-loading">Loading watchlist…</div>
+      <div id="watchlist-grid" class="watchlist-grid"></div>
+    </section>
+
     <!-- Results -->
     <section class="results-section">
       <div id="results-header" class="hidden">

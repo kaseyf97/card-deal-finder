@@ -1,4 +1,35 @@
 import { getToken } from './token.js';
+import { createClient } from '@vercel/kv';
+
+// Record price snapshot to KV (fire-and-forget, never blocks the response)
+async function recordSnapshot(query, items) {
+  if (!process.env.KV_REST_API_URL || !process.env.KV_REST_API_TOKEN) return;
+  if (items.length === 0) return;
+
+  try {
+    const kv = createClient({
+      url: process.env.KV_REST_API_URL,
+      token: process.env.KV_REST_API_TOKEN
+    });
+
+    const prices = items.map(i => parseFloat(i.price)).filter(p => !isNaN(p));
+    const snapshot = {
+      timestamp: Date.now(),
+      lowestPrice: Math.min(...prices),
+      avgPrice: prices.reduce((a, b) => a + b, 0) / prices.length,
+      count: items.length
+    };
+
+    // Keep last 30 snapshots per search query
+    const key = `prices:${query.toLowerCase().replace(/\s+/g, '-').slice(0, 80)}`;
+    const existing = await kv.get(key) || [];
+    existing.push(snapshot);
+    if (existing.length > 30) existing.splice(0, existing.length - 30);
+    await kv.set(key, existing);
+  } catch (err) {
+    console.error('Snapshot error (non-critical):', err.message);
+  }
+}
 
 // eBay category IDs for filtering by sport
 const SPORT_CATEGORIES = {
@@ -71,6 +102,9 @@ export default async function handler(req, res) {
       sellerScore: item.seller?.feedbackPercentage,
       location: item.itemLocation?.country
     }));
+
+    // Record price snapshot in background (don't await — don't slow down response)
+    recordSnapshot(q.trim(), items);
 
     return res.status(200).json({
       total: data.total || 0,
