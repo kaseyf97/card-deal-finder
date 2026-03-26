@@ -68,6 +68,27 @@ Return ONLY the JSON array. No explanation.`
   }
 }
 
+// Keywords that — if found anywhere in a listing title — mean it's NOT an individual card.
+// This runs server-side after eBay returns results, catching anything the search query missed.
+const BLOCKED_TITLE_WORDS = [
+  'box', 'boxes', 'hobby box', 'blaster', 'hanger', 'fat pack', 'retail box',
+  'sealed', 'wax pack', 'jumbo box', 'jumbo pack', 'jumbo card',
+  'case break', 'group break', 'random break', 'live break', 'break',
+  'lot of', ' lot ', 'bundle', 'complete set', 'base set',
+  'reprint', 'custom card', 'fake', 'proxy',
+  'chance', 'random chance', 'mystery box', 'mystery pack',
+  'block chaser', 'chaser pack', 'random slot',
+  'jumbo'
+];
+
+// Filter items whose titles contain any blocked keyword (case-insensitive)
+function filterByTitle(items) {
+  return items.filter(item => {
+    const title = (item.title || '').toLowerCase();
+    return !BLOCKED_TITLE_WORDS.some(word => title.includes(word.toLowerCase()));
+  });
+}
+
 // eBay category IDs for filtering by sport
 const SPORT_CATEGORIES = {
   basketball: '214',   // Basketball Cards
@@ -145,10 +166,12 @@ export default async function handler(req, res) {
       location: item.itemLocation?.country
     }));
 
-    // Use Claude vision to remove any remaining box/pack/sealed listings.
-    // If filtering removes everything (e.g. images weren't accessible), fall back to text-filtered results.
-    const filteredItems = await filterByImage(items);
-    const finalItems = filteredItems.length > 0 ? filteredItems : items;
+    // First pass: hard title filter — removes anything with blocked keywords in the title
+    const titleFiltered = filterByTitle(items);
+
+    // Second pass: Claude vision — removes any remaining listings whose image shows a box/pack
+    const filteredItems = await filterByImage(titleFiltered);
+    const finalItems = filteredItems.length > 0 ? filteredItems : titleFiltered;
 
     return res.status(200).json({
       total: data.total || 0,
