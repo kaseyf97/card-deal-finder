@@ -73,7 +73,7 @@ Return ONLY the JSON array. No explanation.`
 const BLOCKED_TITLE_WORDS = [
   // Sealed products
   'hobby box', 'blaster box', 'blaster', 'hanger box', 'hanger', 'fat pack',
-  'retail box', 'wax pack', 'jumbo box', 'jumbo pack', 'jumbo card', 'jumbo',
+  'retail box', 'wax pack', 'jumbo box', 'jumbo pack', 'jumbo card',
   'sealed box', 'sealed pack', 'sealed case', 'sealed wax',
   'oversize', 'oversized',
   // Breaks & gambling listings
@@ -125,18 +125,18 @@ export default async function handler(req, res) {
       filters.push(`price:[..${maxPrice}]`);
     }
 
-    // Short exclusion list — only what eBay's search engine needs.
-    // The server-side title filter handles everything else, so we keep this
-    // lean to stay well within eBay's ~350-char query limit.
-    const exclusions = '-"hobby box" -"blaster box" -"hanger box" -"fat pack" -"retail box" -"jumbo box" -"wax pack" -"sealed box" -"sealed pack" -"case break" -"group break" -lot -bundle -reprint -fake -proxy';
+    // Minimal exclusions — only the most obvious sealed products.
+    // Keep this short so eBay returns maximum raw results; the server-side
+    // title filter handles everything else precisely.
+    const exclusions = '-"hobby box" -"blaster box" -"case break" -"group break" -reprint -proxy';
     const fullQuery = `${q.trim()} ${exclusions}`;
 
-    // Build query params
+    // Build query params — limit 200 (eBay max) for more results to filter from
     const params = new URLSearchParams({
       q: fullQuery,
       filter: filters.join(','),
       sort: 'price',
-      limit: '100',
+      limit: '200',
       offset: offset || '0'
     });
 
