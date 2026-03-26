@@ -828,6 +828,14 @@ main {
   margin-bottom: 0.6rem;
 }
 
+.card-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
 .card-price {
   font-family: var(--font-display);
   font-size: 1.4rem;
@@ -835,7 +843,39 @@ main {
   color: var(--accent-green);
   letter-spacing: -0.02em;
   line-height: 1;
-  margin-bottom: 0.5rem;
+}
+
+.comp-badge {
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  letter-spacing: 0.02em;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.comp-loading {
+  color: var(--text-muted);
+  background: rgba(255,255,255,0.04);
+}
+
+.comp-below {
+  color: #34d399;
+  background: rgba(16,185,129,0.12);
+  border: 1px solid rgba(16,185,129,0.25);
+}
+
+.comp-above {
+  color: #f87171;
+  background: rgba(239,68,68,0.10);
+  border: 1px solid rgba(239,68,68,0.2);
+}
+
+.comp-near {
+  color: var(--text-secondary);
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
 }
 
 .card-footer {

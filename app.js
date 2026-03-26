@@ -179,6 +179,7 @@ async function runSearch() {
       noResultsEl.classList.remove('hidden');
     } else {
       renderResults(data.items, data.total, q);
+      fetchAndApplyComps(q); // load comp badges after results appear
     }
   } catch (err) {
     showError(err.message);
@@ -195,7 +196,7 @@ function renderResults(items, total, query) {
   resultsHeader.classList.remove('hidden');
 
   resultsGrid.innerHTML = items.map(item => `
-    <div class="card">
+    <div class="card" data-price="${escapeHtml(item.price || '')}">
       <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">
         <div class="card-img-wrap">
           <img
@@ -208,7 +209,10 @@ function renderResults(items, total, query) {
         </div>
         <div class="card-body">
           <div class="card-title">${escapeHtml(item.title)}</div>
-          <div class="card-price">$${formatPrice(item.price)}</div>
+          <div class="card-price-row">
+            <div class="card-price">$${formatPrice(item.price)}</div>
+            <div class="comp-badge comp-loading">…</div>
+          </div>
           <div class="card-footer">
             <span class="card-condition">${escapeHtml(item.condition || 'N/A')}</span>
             <span class="card-seller">
@@ -220,6 +224,51 @@ function renderResults(items, total, query) {
       </a>
     </div>
   `).join('');
+}
+
+// === Comp Badges ===
+// Fetches average sold price from /api/comps, then updates each card badge
+// with the actual avg sold price and whether the listing is above or below it.
+async function fetchAndApplyComps(q) {
+  try {
+    const res = await fetch(`/api/comps?q=${encodeURIComponent(q)}`);
+    const data = await res.json();
+
+    const badges = resultsGrid.querySelectorAll('.comp-badge');
+
+    if (!data.available || !data.avgSoldPrice) {
+      badges.forEach(b => b.remove());
+      return;
+    }
+
+    const avg = data.avgSoldPrice;
+
+    resultsGrid.querySelectorAll('.card').forEach(card => {
+      const badge = card.querySelector('.comp-badge');
+      if (!badge) return;
+
+      const price = parseFloat(card.dataset.price);
+      if (isNaN(price)) { badge.remove(); return; }
+
+      const diffPct = Math.round(((price - avg) / avg) * 100);
+      const avgFormatted = `$${avg.toFixed(2)}`;
+
+      if (diffPct <= -5) {
+        badge.className = 'comp-badge comp-below';
+        badge.textContent = `${Math.abs(diffPct)}% below avg sold · ${avgFormatted}`;
+      } else if (diffPct >= 5) {
+        badge.className = 'comp-badge comp-above';
+        badge.textContent = `${diffPct}% above avg sold · ${avgFormatted}`;
+      } else {
+        badge.className = 'comp-badge comp-near';
+        badge.textContent = `Near avg sold · ${avgFormatted}`;
+      }
+    });
+
+  } catch (err) {
+    // Non-critical — silently remove badges if comps fail
+    resultsGrid.querySelectorAll('.comp-badge').forEach(b => b.remove());
+  }
 }
 
 // === Helpers ===
