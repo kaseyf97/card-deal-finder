@@ -61,29 +61,53 @@
         </div>
       </form>
 
-      <!-- Quick Searches -->
-      <div class="quick-searches">
-        <span class="quick-label">Hot searches</span>
-        <div class="quick-btns">
-          <button class="quick-btn" data-query="2024 Panini Downtown football" data-sport="football">
-            <span class="qb-dot football"></span>Downtown Football
-          </button>
-          <button class="quick-btn" data-query="2024 Panini Downtown basketball" data-sport="basketball">
-            <span class="qb-dot basketball"></span>Downtown Basketball
-          </button>
-          <button class="quick-btn" data-query="2024 Topps Color Blast baseball" data-sport="baseball">
-            <span class="qb-dot baseball"></span>Color Blast Baseball
-          </button>
-          <button class="quick-btn" data-query="2024 Panini Uptown" data-sport="">
-            <span class="qb-dot all"></span>Uptown
-          </button>
-          <button class="quick-btn" data-query="2024 Panini Kaboom basketball" data-sport="basketball">
-            <span class="qb-dot basketball"></span>Kaboom Basketball
-          </button>
-          <button class="quick-btn" data-query="2024 Panini Downtown Wembanyama" data-sport="basketball">
-            <span class="qb-dot basketball"></span>Downtown Wemby
-          </button>
+      <!-- Guided Selector -->
+      <div class="guided-selector">
+        <p class="guided-label">Or build a search</p>
+
+        <!-- Step 1: Sport -->
+        <div class="selector-step" id="step-sport">
+          <span class="step-label">Sport</span>
+          <div class="chip-row-wrapper">
+            <div class="chip-row" id="sport-chips">
+              <button class="chip" data-value="football">🏈 Football</button>
+              <button class="chip" data-value="basketball">🏀 Basketball</button>
+              <button class="chip" data-value="baseball">⚾ Baseball</button>
+            </div>
+          </div>
         </div>
+
+        <!-- Step 2: Card Set -->
+        <div class="selector-step dimmed" id="step-set">
+          <span class="step-label">Card Set</span>
+          <div class="chip-row-wrapper">
+            <div class="chip-row" id="set-chips"></div>
+          </div>
+        </div>
+
+        <!-- Step 3: Player (optional) -->
+        <div class="selector-step dimmed" id="step-player">
+          <span class="step-label">Player <span class="optional-tag">optional</span></span>
+          <div class="chip-row-wrapper">
+            <div class="chip-row" id="player-chips"></div>
+          </div>
+          <input type="text" id="player-input" class="player-input" placeholder="Or type any player name…" autocomplete="off">
+        </div>
+
+        <!-- Step 4: Year (optional) -->
+        <div class="selector-step dimmed" id="step-year">
+          <span class="step-label">Year <span class="optional-tag">optional</span></span>
+          <div class="chip-row-wrapper">
+            <div class="chip-row" id="year-chips">
+              <button class="chip" data-value="2022">2022</button>
+              <button class="chip" data-value="2023">2023</button>
+              <button class="chip" data-value="2024">2024</button>
+              <button class="chip" data-value="2025">2025</button>
+            </div>
+          </div>
+        </div>
+
+        <button id="guided-search-btn" class="guided-search-btn" disabled>Search eBay →</button>
       </div>
     </section>
 

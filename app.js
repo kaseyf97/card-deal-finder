@@ -18,13 +18,166 @@ searchForm.addEventListener('submit', (e) => {
   runSearch();
 });
 
-// Quick search buttons fill in the form and search
-document.querySelectorAll('.quick-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    queryInput.value = btn.dataset.query;
-    sportSelect.value = btn.dataset.sport || '';
-    runSearch();
+// =============================================
+// === Guided Selector ===
+// =============================================
+
+// Card sets per sport — each has a display name, publisher, and eBay search term
+const SETS_BY_SPORT = {
+  football: [
+    { id: 'downtown',  label: 'Downtown',            term: 'Panini Downtown' },
+    { id: 'kaboom',    label: 'Kaboom',               term: 'Panini Kaboom' },
+    { id: 'uptown',    label: 'Uptown',               term: 'Panini Uptown' },
+    { id: 'mosaic',    label: 'Mosaic',               term: 'Panini Mosaic' },
+    { id: 'optic',     label: 'Optic',                term: 'Donruss Optic' },
+    { id: 'prizm',     label: 'Prizm',                term: 'Panini Prizm' },
+    { id: 'select',    label: 'Select',               term: 'Panini Select' },
+    { id: 'nt',        label: 'National Treasures',   term: 'Panini National Treasures' },
+    { id: 'noir',      label: 'Noir',                 term: 'Panini Noir' }
+  ],
+  basketball: [
+    { id: 'downtown',  label: 'Downtown',            term: 'Panini Downtown' },
+    { id: 'kaboom',    label: 'Kaboom',               term: 'Panini Kaboom' },
+    { id: 'uptown',    label: 'Uptown',               term: 'Panini Uptown' },
+    { id: 'colorblast',label: 'Color Blast',          term: 'Panini Color Blast' },
+    { id: 'mosaic',    label: 'Mosaic',               term: 'Panini Mosaic' },
+    { id: 'optic',     label: 'Optic',                term: 'Donruss Optic' },
+    { id: 'prizm',     label: 'Prizm',                term: 'Panini Prizm' },
+    { id: 'select',    label: 'Select',               term: 'Panini Select' },
+    { id: 'nt',        label: 'National Treasures',   term: 'Panini National Treasures' },
+    { id: 'noir',      label: 'Noir',                 term: 'Panini Noir' }
+  ],
+  baseball: [
+    { id: 'colorblast',label: 'Color Blast',          term: 'Topps Color Blast' },
+    { id: 'chrome',    label: 'Chrome',               term: 'Topps Chrome' },
+    { id: 'heritage',  label: 'Heritage',             term: 'Topps Heritage' },
+    { id: 'stadium',   label: 'Stadium Club',         term: 'Topps Stadium Club' },
+    { id: 'finest',    label: 'Topps Finest',         term: 'Topps Finest' },
+    { id: 'mosaic',    label: 'Mosaic',               term: 'Panini Mosaic' }
+  ]
+};
+
+// Top players per sport
+const PLAYERS_BY_SPORT = {
+  football: ['Patrick Mahomes', 'Lamar Jackson', 'Josh Allen', 'CJ Stroud', 'Caleb Williams', 'Justin Jefferson', "Ja'Marr Chase"],
+  basketball: ['LeBron James', 'Victor Wembanyama', 'Luka Doncic', 'Jayson Tatum', 'Caitlin Clark'],
+  baseball: ['Shohei Ohtani', 'Aaron Judge', 'Juan Soto', 'Elly De La Cruz']
+};
+
+// State
+let gSport = null, gSet = null, gPlayer = null, gYear = null;
+
+const guidedSearchBtn = document.getElementById('guided-search-btn');
+const sportChipsEl    = document.getElementById('sport-chips');
+const setChipsEl      = document.getElementById('set-chips');
+const playerChipsEl   = document.getElementById('player-chips');
+const playerInput     = document.getElementById('player-input');
+const stepSet         = document.getElementById('step-set');
+const stepPlayer      = document.getElementById('step-player');
+const stepYear        = document.getElementById('step-year');
+const yearChipsEl     = document.getElementById('year-chips');
+
+// Activate a step (remove dimmed, add active animation)
+function activateStep(el) {
+  el.classList.remove('dimmed');
+  el.classList.remove('active');
+  void el.offsetWidth; // force reflow to restart animation
+  el.classList.add('active');
+}
+
+// Render chips into a container
+function renderChips(container, items, selectedValue, onClick) {
+  container.innerHTML = items.map(item => {
+    const val   = typeof item === 'string' ? item : item.id;
+    const label = typeof item === 'string' ? item : item.label;
+    const sel   = val === selectedValue ? 'selected' : '';
+    return `<button class="chip ${sel}" data-value="${escapeHtml(val)}">${escapeHtml(label)}</button>`;
+  }).join('');
+  container.querySelectorAll('.chip').forEach(btn => {
+    btn.addEventListener('click', () => onClick(btn.dataset.value));
   });
+}
+
+// Sport selected
+sportChipsEl.querySelectorAll('.chip').forEach(btn => {
+  btn.addEventListener('click', () => {
+    gSport = btn.dataset.value;
+    gSet = null; gPlayer = null; gYear = null;
+
+    // Update sport chip selection
+    sportChipsEl.querySelectorAll('.chip').forEach(b => b.classList.toggle('selected', b.dataset.value === gSport));
+
+    // Populate + activate set chips
+    renderChips(setChipsEl, SETS_BY_SPORT[gSport] || [], null, onSetSelected);
+    activateStep(stepSet);
+
+    // Reset downstream
+    stepPlayer.classList.add('dimmed');
+    stepPlayer.classList.remove('active');
+    stepYear.classList.add('dimmed');
+    stepYear.classList.remove('active');
+    playerChipsEl.innerHTML = '';
+    playerInput.value = '';
+    yearChipsEl.querySelectorAll('.chip').forEach(b => b.classList.remove('selected'));
+
+    // Update sport filter dropdown + enable search with broad query
+    sportSelect.value = gSport;
+    guidedSearchBtn.disabled = false;
+  });
+});
+
+function onSetSelected(setId) {
+  gSet = (gSet === setId) ? null : setId; // toggle
+  renderChips(setChipsEl, SETS_BY_SPORT[gSport] || [], gSet, onSetSelected);
+
+  if (gSet) {
+    // Populate players and activate downstream steps
+    renderChips(playerChipsEl, PLAYERS_BY_SPORT[gSport] || [], gPlayer, onPlayerSelected);
+    activateStep(stepPlayer);
+    activateStep(stepYear);
+  } else {
+    stepPlayer.classList.add('dimmed');
+    stepYear.classList.add('dimmed');
+  }
+}
+
+function onPlayerSelected(playerName) {
+  gPlayer = (gPlayer === playerName) ? null : playerName; // toggle
+  renderChips(playerChipsEl, PLAYERS_BY_SPORT[gSport] || [], gPlayer, onPlayerSelected);
+  playerInput.value = gPlayer || '';
+}
+
+// Player free-text input overrides chip selection
+playerInput.addEventListener('input', () => {
+  gPlayer = playerInput.value.trim() || null;
+  // Deselect all player chips when typing freely
+  playerChipsEl.querySelectorAll('.chip').forEach(b => b.classList.remove('selected'));
+});
+
+// Year chips
+yearChipsEl.querySelectorAll('.chip').forEach(btn => {
+  btn.addEventListener('click', () => {
+    gYear = (gYear === btn.dataset.value) ? null : btn.dataset.value;
+    yearChipsEl.querySelectorAll('.chip').forEach(b => b.classList.toggle('selected', b.dataset.value === gYear));
+  });
+});
+
+// Build query from guided selections and run search
+guidedSearchBtn.addEventListener('click', () => {
+  if (!gSport) return;
+  const parts = [];
+  if (gYear) parts.push(gYear);
+  if (gSet) {
+    const setInfo = (SETS_BY_SPORT[gSport] || []).find(s => s.id === gSet);
+    if (setInfo) parts.push(setInfo.term);
+  }
+  if (gPlayer) parts.push(gPlayer);
+  parts.push(gSport); // always include sport
+
+  queryInput.value = parts.join(' ');
+  sportSelect.value = gSport;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  runSearch();
 });
 
 async function runSearch() {
