@@ -58,8 +58,8 @@ export default async function handler(req, res) {
       filters.push(`price:[..${maxPrice}]`);
     }
 
-    // Append exclusions to weed out junk — lots, base cards, customs, reprints
-    const exclusions = '-lot -bundle -reprint -custom -fake -proxy -damaged -"base set" -"base card" -"common" -"lot of"';
+    // Append exclusions to weed out sealed products, lots, base cards, customs
+    const exclusions = '-lot -bundle -reprint -custom -fake -proxy -damaged -"base set" -"base card" -common -box -"hobby box" -"blaster box" -"hanger box" -"fat pack" -"retail box" -"case break" -"group break" -break -pack -sealed -case -"jumbo box"';
     const fullQuery = `${q.trim()} ${exclusions}`;
 
     // Build query params
