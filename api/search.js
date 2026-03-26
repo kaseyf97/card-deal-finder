@@ -58,9 +58,13 @@ export default async function handler(req, res) {
       filters.push(`price:[..${maxPrice}]`);
     }
 
+    // Append exclusions to weed out junk — lots, base cards, customs, reprints
+    const exclusions = '-lot -bundle -reprint -custom -fake -proxy -damaged -"base set" -"base card" -"common" -"lot of"';
+    const fullQuery = `${q.trim()} ${exclusions}`;
+
     // Build query params
     const params = new URLSearchParams({
-      q: q.trim(),
+      q: fullQuery,
       filter: filters.join(','),
       sort: 'price',
       limit: '40'

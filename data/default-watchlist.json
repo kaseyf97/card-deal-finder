@@ -1,32 +1,32 @@
 [
   {
-    "id": "dt-football-2024",
-    "name": "Downtown Football 2024",
-    "query": "2024 Panini Downtown football",
+    "id": "dt-football-ssp-2024",
+    "name": "Downtown Football SSP 2024",
+    "query": "2024 Panini Downtown football SSP short print",
     "sport": "football",
     "maxPrice": 200,
     "enabled": true
   },
   {
-    "id": "dt-basketball-2024",
-    "name": "Downtown Basketball 2024",
-    "query": "2024 Panini Downtown basketball",
+    "id": "dt-basketball-ssp-2024",
+    "name": "Downtown Basketball SSP 2024",
+    "query": "2024 Panini Downtown basketball SSP short print",
     "sport": "basketball",
     "maxPrice": 200,
     "enabled": true
   },
   {
     "id": "dt-wemby-2024",
-    "name": "Downtown Wembanyama 2024",
-    "query": "2024 Panini Downtown Wembanyama",
+    "name": "Downtown Wembanyama SSP 2024",
+    "query": "2024 Panini Downtown Wembanyama SSP short print",
     "sport": "basketball",
     "maxPrice": 500,
     "enabled": true
   },
   {
     "id": "dt-mahomes-2024",
-    "name": "Downtown Mahomes 2024",
-    "query": "2024 Panini Downtown Patrick Mahomes",
+    "name": "Downtown Mahomes SSP 2024",
+    "query": "2024 Panini Downtown Patrick Mahomes SSP short print",
     "sport": "football",
     "maxPrice": 200,
     "enabled": true
@@ -34,7 +34,7 @@
   {
     "id": "cb-baseball-2024",
     "name": "Color Blast Baseball 2024",
-    "query": "2024 Topps Color Blast baseball",
+    "query": "2024 Topps Color Blast baseball short print",
     "sport": "baseball",
     "maxPrice": 300,
     "enabled": true
@@ -42,23 +42,23 @@
   {
     "id": "cb-ohtani-2024",
     "name": "Color Blast Ohtani 2024",
-    "query": "2024 Topps Color Blast Ohtani",
+    "query": "2024 Topps Color Blast Ohtani short print",
     "sport": "baseball",
     "maxPrice": 500,
     "enabled": true
   },
   {
     "id": "ut-football-2024",
-    "name": "Uptown Football 2024",
-    "query": "2024 Panini Uptown football",
+    "name": "Uptown Football SSP 2024",
+    "query": "2024 Panini Uptown football SSP short print",
     "sport": "football",
     "maxPrice": 150,
     "enabled": true
   },
   {
     "id": "ut-basketball-2024",
-    "name": "Uptown Basketball 2024",
-    "query": "2024 Panini Uptown basketball",
+    "name": "Uptown Basketball SSP 2024",
+    "query": "2024 Panini Uptown basketball SSP short print",
     "sport": "basketball",
     "maxPrice": 150,
     "enabled": true
@@ -66,23 +66,23 @@
   {
     "id": "kaboom-basketball-2024",
     "name": "Kaboom Basketball 2024",
-    "query": "2024 Panini Kaboom basketball",
+    "query": "2024 Panini Kaboom basketball case hit",
     "sport": "basketball",
     "maxPrice": 250,
     "enabled": true
   },
   {
     "id": "dt-lamar-2024",
-    "name": "Downtown Lamar Jackson 2024",
-    "query": "2024 Panini Downtown Lamar Jackson",
+    "name": "Downtown Lamar Jackson SSP 2024",
+    "query": "2024 Panini Downtown Lamar Jackson SSP short print",
     "sport": "football",
     "maxPrice": 150,
     "enabled": true
   },
   {
     "id": "dt-baseball-2024",
-    "name": "Downtown Baseball 2024",
-    "query": "2024 Panini Downtown baseball",
+    "name": "Downtown Baseball SSP 2024",
+    "query": "2024 Panini Downtown baseball SSP short print",
     "sport": "baseball",
     "maxPrice": 200,
     "enabled": true
@@ -90,7 +90,7 @@
   {
     "id": "cb-basketball-2024",
     "name": "Color Blast Basketball 2024",
-    "query": "2024 Panini Color Blast basketball",
+    "query": "2024 Panini Color Blast basketball short print",
     "sport": "basketball",
     "maxPrice": 300,
     "enabled": true
