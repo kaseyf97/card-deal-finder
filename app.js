@@ -57,23 +57,13 @@ const SETS_BY_SPORT = {
   ]
 };
 
-// Top players per sport
-const PLAYERS_BY_SPORT = {
-  football: ['Patrick Mahomes', 'Lamar Jackson', 'Josh Allen', 'CJ Stroud', 'Caleb Williams', 'Justin Jefferson', "Ja'Marr Chase"],
-  basketball: ['LeBron James', 'Victor Wembanyama', 'Luka Doncic', 'Jayson Tatum', 'Caitlin Clark'],
-  baseball: ['Shohei Ohtani', 'Aaron Judge', 'Juan Soto', 'Elly De La Cruz']
-};
-
 // State
-let gSport = null, gSet = null, gPlayer = null, gYear = null;
+let gSport = null, gSet = null, gYear = null;
 
 const guidedSearchBtn = document.getElementById('guided-search-btn');
 const sportChipsEl    = document.getElementById('sport-chips');
 const setChipsEl      = document.getElementById('set-chips');
-const playerChipsEl   = document.getElementById('player-chips');
-const playerInput     = document.getElementById('player-input');
 const stepSet         = document.getElementById('step-set');
-const stepPlayer      = document.getElementById('step-player');
 const stepYear        = document.getElementById('step-year');
 const yearChipsEl     = document.getElementById('year-chips');
 
@@ -102,7 +92,7 @@ function renderChips(container, items, selectedValue, onClick) {
 sportChipsEl.querySelectorAll('.chip').forEach(btn => {
   btn.addEventListener('click', () => {
     gSport = btn.dataset.value;
-    gSet = null; gPlayer = null; gYear = null;
+    gSet = null; gYear = null;
 
     // Update sport chip selection
     sportChipsEl.querySelectorAll('.chip').forEach(b => b.classList.toggle('selected', b.dataset.value === gSport));
@@ -112,12 +102,8 @@ sportChipsEl.querySelectorAll('.chip').forEach(btn => {
     activateStep(stepSet);
 
     // Reset downstream
-    stepPlayer.classList.add('dimmed');
-    stepPlayer.classList.remove('active');
     stepYear.classList.add('dimmed');
     stepYear.classList.remove('active');
-    playerChipsEl.innerHTML = '';
-    playerInput.value = '';
     yearChipsEl.querySelectorAll('.chip').forEach(b => b.classList.remove('selected'));
 
     // Update sport filter dropdown + enable search with broad query
@@ -131,28 +117,11 @@ function onSetSelected(setId) {
   renderChips(setChipsEl, SETS_BY_SPORT[gSport] || [], gSet, onSetSelected);
 
   if (gSet) {
-    // Populate players and activate downstream steps
-    renderChips(playerChipsEl, PLAYERS_BY_SPORT[gSport] || [], gPlayer, onPlayerSelected);
-    activateStep(stepPlayer);
     activateStep(stepYear);
   } else {
-    stepPlayer.classList.add('dimmed');
     stepYear.classList.add('dimmed');
   }
 }
-
-function onPlayerSelected(playerName) {
-  gPlayer = (gPlayer === playerName) ? null : playerName; // toggle
-  renderChips(playerChipsEl, PLAYERS_BY_SPORT[gSport] || [], gPlayer, onPlayerSelected);
-  playerInput.value = gPlayer || '';
-}
-
-// Player free-text input overrides chip selection
-playerInput.addEventListener('input', () => {
-  gPlayer = playerInput.value.trim() || null;
-  // Deselect all player chips when typing freely
-  playerChipsEl.querySelectorAll('.chip').forEach(b => b.classList.remove('selected'));
-});
 
 // Year chips
 yearChipsEl.querySelectorAll('.chip').forEach(btn => {
@@ -171,7 +140,6 @@ guidedSearchBtn.addEventListener('click', () => {
     const setInfo = (SETS_BY_SPORT[gSport] || []).find(s => s.id === gSet);
     if (setInfo) parts.push(setInfo.term);
   }
-  if (gPlayer) parts.push(gPlayer);
   parts.push(gSport); // always include sport
 
   queryInput.value = parts.join(' ');
