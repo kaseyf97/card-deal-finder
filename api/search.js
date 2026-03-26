@@ -78,7 +78,8 @@ const BLOCKED_TITLE_WORDS = [
   'reprint', 'custom card', 'fake', 'proxy',
   'chance', 'random chance', 'mystery box', 'mystery pack',
   'block chaser', 'chaser pack', 'random slot',
-  'jumbo'
+  'jumbo',
+  'oversize', 'oversized'
 ];
 
 // Filter items whose titles contain any blocked keyword (case-insensitive)
