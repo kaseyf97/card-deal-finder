@@ -758,6 +758,31 @@ main {
   opacity: 0.4;
 }
 
+/* === Load More === */
+.load-more-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.load-more-btn {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.75rem 2rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.load-more-btn:hover {
+  border-color: var(--accent);
+  color: var(--text-primary);
+}
+
 /* === Card Grid === */
 .card-grid {
   display: grid;

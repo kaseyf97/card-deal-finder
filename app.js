@@ -22,16 +22,18 @@ searchForm.addEventListener('submit', (e) => {
 // === Guided Selector ===
 // =============================================
 
-// Card sets per sport — each has a display name, publisher, and eBay search term
+// Card sets per sport — each has a display name, publisher, and eBay search term.
+// For broad product lines (Prizm, Mosaic, Optic, Select, Chrome) we append "insert"
+// so results focus on inserts/SSPs rather than returning thousands of base cards.
 const SETS_BY_SPORT = {
   football: [
     { id: 'downtown',  label: 'Downtown',            term: 'Panini Downtown' },
     { id: 'kaboom',    label: 'Kaboom',               term: 'Panini Kaboom' },
     { id: 'uptown',    label: 'Uptown',               term: 'Panini Uptown' },
-    { id: 'mosaic',    label: 'Mosaic',               term: 'Panini Mosaic' },
-    { id: 'optic',     label: 'Optic',                term: 'Donruss Optic' },
-    { id: 'prizm',     label: 'Prizm',                term: 'Panini Prizm' },
-    { id: 'select',    label: 'Select',               term: 'Panini Select' },
+    { id: 'mosaic',    label: 'Mosaic',               term: 'Panini Mosaic insert' },
+    { id: 'optic',     label: 'Optic',                term: 'Donruss Optic insert' },
+    { id: 'prizm',     label: 'Prizm',                term: 'Panini Prizm insert' },
+    { id: 'select',    label: 'Select',               term: 'Panini Select insert' },
     { id: 'nt',        label: 'National Treasures',   term: 'Panini National Treasures' },
     { id: 'noir',      label: 'Noir',                 term: 'Panini Noir' }
   ],
@@ -40,20 +42,20 @@ const SETS_BY_SPORT = {
     { id: 'kaboom',    label: 'Kaboom',               term: 'Panini Kaboom' },
     { id: 'uptown',    label: 'Uptown',               term: 'Panini Uptown' },
     { id: 'colorblast',label: 'Color Blast',          term: 'Panini Color Blast' },
-    { id: 'mosaic',    label: 'Mosaic',               term: 'Panini Mosaic' },
-    { id: 'optic',     label: 'Optic',                term: 'Donruss Optic' },
-    { id: 'prizm',     label: 'Prizm',                term: 'Panini Prizm' },
-    { id: 'select',    label: 'Select',               term: 'Panini Select' },
+    { id: 'mosaic',    label: 'Mosaic',               term: 'Panini Mosaic insert' },
+    { id: 'optic',     label: 'Optic',                term: 'Donruss Optic insert' },
+    { id: 'prizm',     label: 'Prizm',                term: 'Panini Prizm insert' },
+    { id: 'select',    label: 'Select',               term: 'Panini Select insert' },
     { id: 'nt',        label: 'National Treasures',   term: 'Panini National Treasures' },
     { id: 'noir',      label: 'Noir',                 term: 'Panini Noir' }
   ],
   baseball: [
     { id: 'colorblast',label: 'Color Blast',          term: 'Topps Color Blast' },
-    { id: 'chrome',    label: 'Chrome',               term: 'Topps Chrome' },
-    { id: 'heritage',  label: 'Heritage',             term: 'Topps Heritage' },
-    { id: 'stadium',   label: 'Stadium Club',         term: 'Topps Stadium Club' },
-    { id: 'finest',    label: 'Topps Finest',         term: 'Topps Finest' },
-    { id: 'mosaic',    label: 'Mosaic',               term: 'Panini Mosaic' }
+    { id: 'chrome',    label: 'Chrome',               term: 'Topps Chrome insert' },
+    { id: 'heritage',  label: 'Heritage',             term: 'Topps Heritage insert' },
+    { id: 'stadium',   label: 'Stadium Club',         term: 'Topps Stadium Club insert' },
+    { id: 'finest',    label: 'Topps Finest',         term: 'Topps Finest insert' },
+    { id: 'mosaic',    label: 'Mosaic',               term: 'Panini Mosaic insert' }
   ]
 };
 
@@ -148,38 +150,54 @@ guidedSearchBtn.addEventListener('click', () => {
   runSearch();
 });
 
-async function runSearch() {
+// Tracks current search state for Load More
+let searchState = { q: '', maxPrice: '', sport: '', offset: 0, total: 0 };
+
+async function runSearch(append = false) {
   const q = queryInput.value.trim();
   if (!q) return;
 
-  // Show loading, hide everything else
+  if (!append) {
+    searchState = { q, maxPrice: maxPriceInput.value, sport: sportSelect.value, offset: 0, total: 0 };
+    resultsGrid.innerHTML = '';
+    resultsHeader.classList.add('hidden');
+    noResultsEl.classList.add('hidden');
+    hideLoadMore();
+  }
+
   showLoading(true);
   hideError();
-  resultsGrid.innerHTML = '';
-  resultsHeader.classList.add('hidden');
-  noResultsEl.classList.add('hidden');
   searchBtn.disabled = true;
 
   try {
-    // Build query string
-    const params = new URLSearchParams({ q });
-    const maxPrice = maxPriceInput.value;
-    const sport = sportSelect.value;
-    if (maxPrice) params.set('maxPrice', maxPrice);
-    if (sport) params.set('sport', sport);
+    const params = new URLSearchParams({ q: searchState.q });
+    if (searchState.maxPrice) params.set('maxPrice', searchState.maxPrice);
+    if (searchState.sport) params.set('sport', searchState.sport);
+    if (searchState.offset) params.set('offset', searchState.offset);
 
     const res = await fetch(`/api/search?${params}`);
     const data = await res.json();
 
-    if (!res.ok) {
-      throw new Error(data.error || 'Search failed');
-    }
+    if (!res.ok) throw new Error(data.error || 'Search failed');
 
-    if (data.items.length === 0) {
+    searchState.total = data.total || 0;
+    searchState.offset += data.items.length;
+
+    if (data.items.length === 0 && !append) {
       noResultsEl.classList.remove('hidden');
     } else {
-      renderResults(data.items, data.total, q);
-      fetchAndApplyComps(); // badge each card vs avg listing price
+      if (append) {
+        appendResults(data.items);
+      } else {
+        renderResults(data.items, searchState.total, q);
+      }
+      fetchAndApplyComps();
+      // Show Load More if eBay has more results beyond what we fetched
+      if (searchState.offset < searchState.total) {
+        showLoadMore();
+      } else {
+        hideLoadMore();
+      }
     }
   } catch (err) {
     showError(err.message);
@@ -225,6 +243,47 @@ function renderResults(items, total, query) {
     </div>
   `).join('');
 }
+
+// Appends more cards to the existing grid (Load More)
+function appendResults(items) {
+  const html = items.map(item => `
+    <div class="card" data-price="${escapeHtml(item.price || '')}">
+      <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">
+        <div class="card-img-wrap">
+          <img
+            class="card-img"
+            src="${escapeHtml(item.image || '')}"
+            alt="${escapeHtml(item.title)}"
+            loading="lazy"
+            onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%2250%%22 x=%2250%%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2212%22 fill=%22%23475569%22>No Image</text></svg>'"
+          >
+        </div>
+        <div class="card-body">
+          <div class="card-title">${escapeHtml(item.title)}</div>
+          <div class="card-price-row">
+            <div class="card-price">$${formatPrice(item.price)}</div>
+            <div class="comp-badge comp-loading">…</div>
+          </div>
+          <div class="card-footer">
+            <span class="card-condition">${escapeHtml(item.condition || 'N/A')}</span>
+            <span class="card-seller">
+              ${item.sellerScore ? `<span class="seller-score">${item.sellerScore}%</span>` : ''}
+            </span>
+          </div>
+        </div>
+        <span class="card-view-btn">View on eBay →</span>
+      </a>
+    </div>
+  `).join('');
+  resultsGrid.insertAdjacentHTML('beforeend', html);
+}
+
+// === Load More ===
+const loadMoreBtn = document.getElementById('load-more-btn');
+loadMoreBtn.addEventListener('click', () => runSearch(true));
+
+function showLoadMore() { loadMoreBtn.classList.remove('hidden'); }
+function hideLoadMore() { loadMoreBtn.classList.add('hidden'); }
 
 // === Comp Badges ===
 // Calculates average listing price from the current results and badges each card

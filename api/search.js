@@ -71,22 +71,30 @@ Return ONLY the JSON array. No explanation.`
 // Keywords that — if found anywhere in a listing title — mean it's NOT an individual card.
 // This runs server-side after eBay returns results, catching anything the search query missed.
 const BLOCKED_TITLE_WORDS = [
-  'box', 'boxes', 'hobby box', 'blaster', 'hanger', 'fat pack', 'retail box',
-  'sealed', 'wax pack', 'jumbo box', 'jumbo pack', 'jumbo card',
-  'case break', 'group break', 'random break', 'live break', 'break',
+  // Sealed products
+  'hobby box', 'blaster box', 'blaster', 'hanger box', 'hanger', 'fat pack',
+  'retail box', 'wax pack', 'jumbo box', 'jumbo pack', 'jumbo card', 'jumbo',
+  'sealed box', 'sealed pack', 'sealed case', 'sealed wax',
+  'oversize', 'oversized',
+  // Breaks
+  'case break', 'group break', 'random break', 'live break', 'block chaser',
+  'chaser pack', 'random slot', 'mystery box', 'mystery pack',
+  // Lots & bundles
   'lot of', ' lot ', 'bundle', 'complete set', 'base set',
-  'reprint', 'custom card', 'fake', 'proxy',
-  'chance', 'random chance', 'mystery box', 'mystery pack',
-  'block chaser', 'chaser pack', 'random slot',
-  'jumbo',
-  'oversize', 'oversized'
+  // Fakes & reprints
+  'reprint', 'custom card', 'fake', 'proxy'
 ];
+
+// Words that must match as whole words only (to avoid blocking "breakthrough", "sandbox", etc.)
+const BLOCKED_WHOLE_WORDS = ['break', 'breaks', 'box', 'boxes', 'sealed'];
 
 // Filter items whose titles contain any blocked keyword (case-insensitive)
 function filterByTitle(items) {
   return items.filter(item => {
     const title = (item.title || '').toLowerCase();
-    return !BLOCKED_TITLE_WORDS.some(word => title.includes(word.toLowerCase()));
+    if (BLOCKED_TITLE_WORDS.some(w => title.includes(w))) return false;
+    if (BLOCKED_WHOLE_WORDS.some(w => new RegExp(`\\b${w}\\b`).test(title))) return false;
+    return true;
   });
 }
 
@@ -102,7 +110,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { q, maxPrice, sport } = req.query;
+  const { q, maxPrice, sport, offset } = req.query;
 
   if (!q || q.trim().length === 0) {
     return res.status(400).json({ error: 'Search query (q) is required' });
@@ -117,9 +125,10 @@ export default async function handler(req, res) {
       filters.push(`price:[..${maxPrice}]`);
     }
 
-    // Append exclusions to weed out sealed products, lots, base cards, chances, customs.
-    // Use quoted phrases to avoid over-blocking (e.g. don't block "case hit", just "case break")
-    const exclusions = '-lot -bundle -reprint -custom -fake -proxy -damaged -"base set" -"base card" -"hobby box" -"blaster box" -"hanger box" -"fat pack" -"retail box" -"case break" -"group break" -"wax pack" -"sealed pack" -"sealed box" -"jumbo box" -jumbo -"jumbo card" -chance -"random chance" -mystery -"block chaser" -chaser -"random slot"';
+    // Short exclusion list — only what eBay's search engine needs.
+    // The server-side title filter handles everything else, so we keep this
+    // lean to stay well within eBay's ~350-char query limit.
+    const exclusions = '-"hobby box" -"blaster box" -"hanger box" -"fat pack" -"retail box" -"jumbo box" -"wax pack" -"sealed box" -"sealed pack" -"case break" -"group break" -lot -bundle -reprint -fake -proxy';
     const fullQuery = `${q.trim()} ${exclusions}`;
 
     // Build query params
@@ -127,7 +136,8 @@ export default async function handler(req, res) {
       q: fullQuery,
       filter: filters.join(','),
       sort: 'price',
-      limit: '40'
+      limit: '100',
+      offset: offset || '0'
     });
 
     // Filter by sport category if specified
