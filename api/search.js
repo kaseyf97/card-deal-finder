@@ -53,7 +53,15 @@ Return ONLY the JSON array. No explanation.`
     );
 
     // Keep items with no image (can't filter them) + items Claude approved
-    return items.filter(item => !item.image || keepIds.has(item.id));
+    const result = items.filter(item => !item.image || keepIds.has(item.id));
+
+    // If Claude removed more than 80% of results, images likely weren't accessible — return original
+    if (result.length < items.length * 0.2) {
+      console.warn('Image filter removed too many results — falling back to text-filtered list');
+      return items;
+    }
+
+    return result;
 
   } catch (err) {
     console.error('Image filter error (non-critical):', err.message);
@@ -167,15 +175,17 @@ export default async function handler(req, res) {
       location: item.itemLocation?.country
     }));
 
-    // Use Claude vision to remove any remaining box/pack/sealed listings
+    // Use Claude vision to remove any remaining box/pack/sealed listings.
+    // If filtering removes everything (e.g. images weren't accessible), fall back to text-filtered results.
     const filteredItems = await filterByImage(items);
+    const finalItems = filteredItems.length > 0 ? filteredItems : items;
 
     // Record price snapshot in background (don't await — don't slow down response)
-    recordSnapshot(q.trim(), filteredItems);
+    recordSnapshot(q.trim(), finalItems);
 
     return res.status(200).json({
       total: data.total || 0,
-      items: filteredItems
+      items: finalItems
     });
 
   } catch (err) {
