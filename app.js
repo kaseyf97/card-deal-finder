@@ -288,9 +288,10 @@ loadMoreBtn.addEventListener('click', () => runSearch(true));
 function showLoadMore() { loadMoreBtn.classList.remove('hidden'); }
 function hideLoadMore() { loadMoreBtn.classList.add('hidden'); }
 
-// === Comp Badges ===
-// Calculates average listing price from the current results and badges each card
-// showing how it compares (e.g. "18% below avg listing · $142.00")
+// === Price Range Indicator ===
+// Shows a visual bar on each card indicating where its price sits between
+// the cheapest and most expensive listing in the current result set.
+// Green dot = low end, amber = middle, red = high end.
 function fetchAndApplyComps() {
   const cards = Array.from(resultsGrid.querySelectorAll('.card'));
   if (cards.length === 0) return;
@@ -299,13 +300,17 @@ function fetchAndApplyComps() {
     .map(c => parseFloat(c.dataset.price))
     .filter(p => !isNaN(p) && p > 0);
 
-  if (prices.length < 3) {
+  if (prices.length < 2) {
     cards.forEach(c => c.querySelector('.comp-badge')?.remove());
     return;
   }
 
-  const avg = prices.reduce((a, b) => a + b, 0) / prices.length;
-  const avgFormatted = `$${avg.toFixed(2)}`;
+  const min = Math.min(...prices);
+  const max = Math.max(...prices);
+  const range = max - min;
+
+  const minLabel = `$${min % 1 === 0 ? min : min.toFixed(0)} low`;
+  const maxLabel = `$${max % 1 === 0 ? max : max.toFixed(0)} high`;
 
   cards.forEach(card => {
     const badge = card.querySelector('.comp-badge');
@@ -314,18 +319,24 @@ function fetchAndApplyComps() {
     const price = parseFloat(card.dataset.price);
     if (isNaN(price)) { badge.remove(); return; }
 
-    const diffPct = Math.round(((price - avg) / avg) * 100);
+    // Position as 0–100% across the price range
+    const pct = range === 0 ? 50 : Math.round(((price - min) / range) * 100);
 
-    if (diffPct <= -5) {
-      badge.className = 'comp-badge comp-below';
-      badge.textContent = `${Math.abs(diffPct)}% below avg · ${avgFormatted}`;
-    } else if (diffPct >= 5) {
-      badge.className = 'comp-badge comp-above';
-      badge.textContent = `${diffPct}% above avg · ${avgFormatted}`;
-    } else {
-      badge.className = 'comp-badge comp-near';
-      badge.textContent = `Near avg · ${avgFormatted}`;
-    }
+    // Color: green bottom third, amber middle, red top third
+    const dotColor = pct <= 33 ? '#34d399' : pct <= 66 ? '#fbbf24' : '#f87171';
+    const label    = pct <= 33 ? 'Low in results' : pct <= 66 ? 'Mid range' : 'High in results';
+
+    badge.className = 'comp-badge price-range-badge';
+    badge.innerHTML = `
+      <div class="price-range-track">
+        <div class="price-range-dot" style="left:${pct}%;background:${dotColor};box-shadow:0 0 5px ${dotColor}88;"></div>
+      </div>
+      <div class="price-range-labels">
+        <span>${minLabel}</span>
+        <span class="price-range-label-center" style="color:${dotColor}">${label}</span>
+        <span>${maxLabel}</span>
+      </div>
+    `;
   });
 }
 

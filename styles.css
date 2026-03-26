@@ -885,22 +885,46 @@ main {
   background: rgba(255,255,255,0.04);
 }
 
-.comp-below {
-  color: #34d399;
-  background: rgba(16,185,129,0.12);
-  border: 1px solid rgba(16,185,129,0.25);
+/* Price range bar — replaces text badges */
+.price-range-badge {
+  display: block;
+  width: 100%;
+  padding: 0.35rem 0;
+  background: none;
+  border-radius: 0;
+  white-space: normal;
 }
 
-.comp-above {
-  color: #f87171;
-  background: rgba(239,68,68,0.10);
-  border: 1px solid rgba(239,68,68,0.2);
+.price-range-track {
+  position: relative;
+  height: 3px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+  margin: 4px 0 5px;
 }
 
-.comp-near {
-  color: var(--text-secondary);
-  background: rgba(255,255,255,0.05);
-  border: 1px solid var(--border);
+.price-range-dot {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  top: -3px;
+  transform: translateX(-50%);
+  transition: left 0.3s ease;
+}
+
+.price-range-labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.price-range-label-center {
+  font-weight: 600;
+  font-size: 0.62rem;
 }
 
 .card-footer {
