@@ -179,7 +179,7 @@ async function runSearch() {
       noResultsEl.classList.remove('hidden');
     } else {
       renderResults(data.items, data.total, q);
-      fetchAndApplyComps(q); // load comp badges after results appear
+      fetchAndApplyComps(); // badge each card vs avg listing price
     }
   } catch (err) {
     showError(err.message);
@@ -227,48 +227,44 @@ function renderResults(items, total, query) {
 }
 
 // === Comp Badges ===
-// Fetches average sold price from /api/comps, then updates each card badge
-// with the actual avg sold price and whether the listing is above or below it.
-async function fetchAndApplyComps(q) {
-  try {
-    const res = await fetch(`/api/comps?q=${encodeURIComponent(q)}`);
-    const data = await res.json();
+// Calculates average listing price from the current results and badges each card
+// showing how it compares (e.g. "18% below avg listing · $142.00")
+function fetchAndApplyComps() {
+  const cards = Array.from(resultsGrid.querySelectorAll('.card'));
+  if (cards.length === 0) return;
 
-    const badges = resultsGrid.querySelectorAll('.comp-badge');
+  const prices = cards
+    .map(c => parseFloat(c.dataset.price))
+    .filter(p => !isNaN(p) && p > 0);
 
-    if (!data.available || !data.avgSoldPrice) {
-      badges.forEach(b => b.remove());
-      return;
-    }
-
-    const avg = data.avgSoldPrice;
-
-    resultsGrid.querySelectorAll('.card').forEach(card => {
-      const badge = card.querySelector('.comp-badge');
-      if (!badge) return;
-
-      const price = parseFloat(card.dataset.price);
-      if (isNaN(price)) { badge.remove(); return; }
-
-      const diffPct = Math.round(((price - avg) / avg) * 100);
-      const avgFormatted = `$${avg.toFixed(2)}`;
-
-      if (diffPct <= -5) {
-        badge.className = 'comp-badge comp-below';
-        badge.textContent = `${Math.abs(diffPct)}% below avg sold · ${avgFormatted}`;
-      } else if (diffPct >= 5) {
-        badge.className = 'comp-badge comp-above';
-        badge.textContent = `${diffPct}% above avg sold · ${avgFormatted}`;
-      } else {
-        badge.className = 'comp-badge comp-near';
-        badge.textContent = `Near avg sold · ${avgFormatted}`;
-      }
-    });
-
-  } catch (err) {
-    // Non-critical — silently remove badges if comps fail
-    resultsGrid.querySelectorAll('.comp-badge').forEach(b => b.remove());
+  if (prices.length < 3) {
+    cards.forEach(c => c.querySelector('.comp-badge')?.remove());
+    return;
   }
+
+  const avg = prices.reduce((a, b) => a + b, 0) / prices.length;
+  const avgFormatted = `$${avg.toFixed(2)}`;
+
+  cards.forEach(card => {
+    const badge = card.querySelector('.comp-badge');
+    if (!badge) return;
+
+    const price = parseFloat(card.dataset.price);
+    if (isNaN(price)) { badge.remove(); return; }
+
+    const diffPct = Math.round(((price - avg) / avg) * 100);
+
+    if (diffPct <= -5) {
+      badge.className = 'comp-badge comp-below';
+      badge.textContent = `${Math.abs(diffPct)}% below avg · ${avgFormatted}`;
+    } else if (diffPct >= 5) {
+      badge.className = 'comp-badge comp-above';
+      badge.textContent = `${diffPct}% above avg · ${avgFormatted}`;
+    } else {
+      badge.className = 'comp-badge comp-near';
+      badge.textContent = `Near avg · ${avgFormatted}`;
+    }
+  });
 }
 
 // === Helpers ===
