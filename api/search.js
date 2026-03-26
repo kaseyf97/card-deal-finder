@@ -1,71 +1,77 @@
 import { getToken } from './token.js';
 import Anthropic from '@anthropic-ai/sdk';
 
-// Use Claude Haiku vision to filter out any listings whose image
-// shows a box, pack, case, or sealed product instead of an actual card.
-// If the API key isn't set or anything fails, returns items unchanged.
+// Use Claude Haiku vision to filter out listings whose image shows a box,
+// pack, case, or sealed product. Processes in batches of 20 so Claude stays
+// accurate — sending 100+ images at once hurts accuracy significantly.
 async function filterByImage(items) {
   if (!process.env.ANTHROPIC_API_KEY) return items;
 
-  // Only check items that have an image
   const withImage = items.filter(i => i.image);
+  const noImage   = items.filter(i => !i.image);
   if (withImage.length === 0) return items;
 
-  try {
-    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  const BATCH_SIZE = 20;
+  const keepIds = new Set();
 
-    // Build the message — one image block per item, then a text prompt
-    const imageBlocks = withImage.map(item => ({
-      type: 'image',
-      source: { type: 'url', url: item.image }
-    }));
+  // Split into batches of 20 and run Claude on each
+  for (let i = 0; i < withImage.length; i += BATCH_SIZE) {
+    const batch = withImage.slice(i, i + BATCH_SIZE);
 
-    const response = await anthropic.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 256,
-      messages: [{
-        role: 'user',
-        content: [
-          ...imageBlocks,
-          {
-            type: 'text',
-            text: `These are eBay listing thumbnail images, numbered 0 to ${withImage.length - 1}.
-I am looking for individual trading cards only — NOT boxes, packs, cases, sealed products, lots, or breaks.
-Return a JSON array of the index numbers that show an actual individual trading card (not sealed/box/pack).
-Example: [0,1,3,5]
-Return ONLY the JSON array. No explanation.`
-          }
-        ]
-      }]
-    });
+    try {
+      const imageBlocks = batch.map(item => ({
+        type: 'image',
+        source: { type: 'url', url: item.image }
+      }));
 
-    // Parse Claude's response — expect something like [0,1,3,5]
-    const raw = response.content[0]?.text?.trim() || '[]';
-    const match = raw.match(/\[[\d,\s]*\]/);
-    if (!match) return items; // Can't parse — return unfiltered
+      const response = await anthropic.messages.create({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 128,
+        messages: [{
+          role: 'user',
+          content: [
+            ...imageBlocks,
+            {
+              type: 'text',
+              text: `eBay listing thumbnails, numbered 0 to ${batch.length - 1}.
+Keep ONLY individual trading cards. Reject: boxes, packs, cases, sealed products, lots, breaks, oversized cards, stickers.
+Return a JSON array of index numbers to KEEP. Example: [0,2,4]
+JSON only, no explanation.`
+            }
+          ]
+        }]
+      });
 
-    const keepIndices = new Set(JSON.parse(match[0]));
+      const raw = response.content[0]?.text?.trim() || '[]';
+      const match = raw.match(/\[[\d,\s]*\]/);
+      if (!match) {
+        // Can't parse this batch — keep all items in it
+        batch.forEach(item => keepIds.add(item.id));
+        continue;
+      }
 
-    // Build set of item IDs to keep
-    const keepIds = new Set(
-      withImage.filter((_, i) => keepIndices.has(i)).map(item => item.id)
-    );
+      const kept = new Set(JSON.parse(match[0]));
 
-    // Keep items with no image (can't filter them) + items Claude approved
-    const result = items.filter(item => !item.image || keepIds.has(item.id));
+      // If Claude kept < 10% of the batch, images likely inaccessible — keep all
+      if (kept.size < batch.length * 0.1) {
+        batch.forEach(item => keepIds.add(item.id));
+      } else {
+        batch.filter((_, idx) => kept.has(idx)).forEach(item => keepIds.add(item.id));
+      }
 
-    // If Claude removed more than 80% of results, images likely weren't accessible — return original
-    if (result.length < items.length * 0.2) {
-      console.warn('Image filter removed too many results — falling back to text-filtered list');
-      return items;
+    } catch (err) {
+      console.error(`Image filter batch ${i} error:`, err.message);
+      // On error, keep the whole batch rather than silently dropping items
+      batch.forEach(item => keepIds.add(item.id));
     }
-
-    return result;
-
-  } catch (err) {
-    console.error('Image filter error (non-critical):', err.message);
-    return items; // Degrade gracefully — return unfiltered
   }
+
+  // Items with no image pass through automatically
+  const filtered = [...noImage, ...withImage.filter(item => keepIds.has(item.id))];
+
+  // Final safety: if we somehow ended up with nothing, return original
+  return filtered.length > 0 ? filtered : items;
 }
 
 // Keywords that — if found anywhere in a listing title — mean it's NOT an individual card.
