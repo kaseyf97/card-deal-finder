@@ -79,7 +79,6 @@ const BLOCKED_TITLE_WORDS = [
   // Breaks & gambling listings
   'case break', 'group break', 'random break', 'live break', 'block chaser',
   'chaser pack', 'random slot', 'mystery box', 'mystery pack',
-  'your chance', 'win a', 'chance to', 'pick your',
   // Lots & bundles
   'lot of', ' lot ', 'bundle', 'complete set', 'base set',
   // Fakes & reprints
@@ -87,7 +86,7 @@ const BLOCKED_TITLE_WORDS = [
 ];
 
 // Words that must match as whole words only (to avoid blocking "breakthrough", "sandbox", etc.)
-const BLOCKED_WHOLE_WORDS = ['break', 'breaks', 'box', 'boxes', 'sealed', 'chance', 'random'];
+const BLOCKED_WHOLE_WORDS = ['break', 'breaks', 'box', 'boxes', 'sealed'];
 
 // Filter items whose titles contain any blocked keyword (case-insensitive)
 function filterByTitle(items) {
