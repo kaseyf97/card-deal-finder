@@ -184,8 +184,14 @@ export default async function handler(req, res) {
     const filteredItems = await filterByImage(titleFiltered);
     const finalItems = filteredItems.length > 0 ? filteredItems : titleFiltered;
 
+    // nextOffset is based on raw items fetched (before filtering), not filtered count.
+    // This is what eBay needs for the next page request.
+    const currentOffset = parseInt(offset || 0);
+    const nextOffset = currentOffset + items.length;
+
     return res.status(200).json({
       total: data.total || 0,
+      nextOffset,
       items: finalItems
     });
 

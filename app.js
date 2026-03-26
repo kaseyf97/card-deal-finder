@@ -181,7 +181,7 @@ async function runSearch(append = false) {
     if (!res.ok) throw new Error(data.error || 'Search failed');
 
     searchState.total = data.total || 0;
-    searchState.offset += data.items.length;
+    searchState.offset = data.nextOffset ?? (searchState.offset + data.items.length);
 
     if (data.items.length === 0 && !append) {
       noResultsEl.classList.remove('hidden');
