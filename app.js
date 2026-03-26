@@ -142,10 +142,10 @@ guidedSearchBtn.addEventListener('click', () => {
     const setInfo = (SETS_BY_SPORT[gSport] || []).find(s => s.id === gSet);
     if (setInfo) parts.push(setInfo.term);
   }
-  // Only add sport as a keyword if no set was chosen (broad fallback).
-  // When a set is selected, the eBay category filter handles sport — adding the sport
-  // word to the query reduces results since sellers don't always use it in titles.
-  if (!gSet) parts.push(gSport);
+  // Always include sport keyword — many sellers miscategorize cards so the eBay
+  // category filter alone lets cross-sport results through (e.g. basketball Downtowns
+  // appearing in football results). Sport in the query + category filter = reliable.
+  parts.push(gSport);
 
   queryInput.value = parts.join(' ');
   sportSelect.value = gSport;
