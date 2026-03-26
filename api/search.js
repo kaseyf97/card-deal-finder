@@ -1,5 +1,65 @@
 import { getToken } from './token.js';
 import { createClient } from '@vercel/kv';
+import Anthropic from '@anthropic-ai/sdk';
+
+// Use Claude Haiku vision to filter out any listings whose image
+// shows a box, pack, case, or sealed product instead of an actual card.
+// If the API key isn't set or anything fails, returns items unchanged.
+async function filterByImage(items) {
+  if (!process.env.ANTHROPIC_API_KEY) return items;
+
+  // Only check items that have an image
+  const withImage = items.filter(i => i.image);
+  if (withImage.length === 0) return items;
+
+  try {
+    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+    // Build the message — one image block per item, then a text prompt
+    const imageBlocks = withImage.map(item => ({
+      type: 'image',
+      source: { type: 'url', url: item.image }
+    }));
+
+    const response = await anthropic.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 256,
+      messages: [{
+        role: 'user',
+        content: [
+          ...imageBlocks,
+          {
+            type: 'text',
+            text: `These are eBay listing thumbnail images, numbered 0 to ${withImage.length - 1}.
+I am looking for individual trading cards only — NOT boxes, packs, cases, sealed products, lots, or breaks.
+Return a JSON array of the index numbers that show an actual individual trading card (not sealed/box/pack).
+Example: [0,1,3,5]
+Return ONLY the JSON array. No explanation.`
+          }
+        ]
+      }]
+    });
+
+    // Parse Claude's response — expect something like [0,1,3,5]
+    const raw = response.content[0]?.text?.trim() || '[]';
+    const match = raw.match(/\[[\d,\s]*\]/);
+    if (!match) return items; // Can't parse — return unfiltered
+
+    const keepIndices = new Set(JSON.parse(match[0]));
+
+    // Build set of item IDs to keep
+    const keepIds = new Set(
+      withImage.filter((_, i) => keepIndices.has(i)).map(item => item.id)
+    );
+
+    // Keep items with no image (can't filter them) + items Claude approved
+    return items.filter(item => !item.image || keepIds.has(item.id));
+
+  } catch (err) {
+    console.error('Image filter error (non-critical):', err.message);
+    return items; // Degrade gracefully — return unfiltered
+  }
+}
 
 // Record price snapshot to KV (fire-and-forget, never blocks the response)
 async function recordSnapshot(query, items) {
@@ -107,12 +167,15 @@ export default async function handler(req, res) {
       location: item.itemLocation?.country
     }));
 
+    // Use Claude vision to remove any remaining box/pack/sealed listings
+    const filteredItems = await filterByImage(items);
+
     // Record price snapshot in background (don't await — don't slow down response)
-    recordSnapshot(q.trim(), items);
+    recordSnapshot(q.trim(), filteredItems);
 
     return res.status(200).json({
       total: data.total || 0,
-      items
+      items: filteredItems
     });
 
   } catch (err) {
