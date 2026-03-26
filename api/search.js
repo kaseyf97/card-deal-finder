@@ -97,7 +97,7 @@ export default async function handler(req, res) {
 
     // Append exclusions to weed out sealed products, lots, base cards, chances, customs.
     // Use quoted phrases to avoid over-blocking (e.g. don't block "case hit", just "case break")
-    const exclusions = '-lot -bundle -reprint -custom -fake -proxy -damaged -"base set" -"base card" -"hobby box" -"blaster box" -"hanger box" -"fat pack" -"retail box" -"case break" -"group break" -"wax pack" -"sealed pack" -"sealed box" -"jumbo box" -chance -"random chance" -mystery -"block chaser" -chaser -"random slot"';
+    const exclusions = '-lot -bundle -reprint -custom -fake -proxy -damaged -"base set" -"base card" -"hobby box" -"blaster box" -"hanger box" -"fat pack" -"retail box" -"case break" -"group break" -"wax pack" -"sealed pack" -"sealed box" -"jumbo box" -jumbo -"jumbo card" -chance -"random chance" -mystery -"block chaser" -chaser -"random slot"';
     const fullQuery = `${q.trim()} ${exclusions}`;
 
     // Build query params
