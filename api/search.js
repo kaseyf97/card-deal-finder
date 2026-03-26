@@ -73,9 +73,9 @@ Return ONLY the JSON array. No explanation.`
 const BLOCKED_TITLE_WORDS = [
   // Sealed products
   'hobby box', 'blaster box', 'blaster', 'hanger box', 'hanger', 'fat pack',
-  'retail box', 'wax pack', 'jumbo box', 'jumbo pack', 'jumbo card',
+  'retail box', 'wax pack', 'jumbo box', 'jumbo pack', 'jumbo card', 'jumbo pack',
   'sealed box', 'sealed pack', 'sealed case', 'sealed wax',
-  'oversize', 'oversized',
+  'oversize', 'oversized', 'oversized card', 'jumbo size',
   // Breaks & gambling listings
   'case break', 'group break', 'random break', 'live break', 'block chaser',
   'chaser pack', 'random slot', 'mystery box', 'mystery pack',
@@ -86,7 +86,7 @@ const BLOCKED_TITLE_WORDS = [
 ];
 
 // Words that must match as whole words only (to avoid blocking "breakthrough", "sandbox", etc.)
-const BLOCKED_WHOLE_WORDS = ['break', 'breaks', 'box', 'boxes', 'sealed'];
+const BLOCKED_WHOLE_WORDS = ['break', 'breaks', 'box', 'boxes', 'sealed', 'jumbo', 'oversize', 'oversized'];
 
 // Filter items whose titles contain any blocked keyword (case-insensitive)
 function filterByTitle(items) {
