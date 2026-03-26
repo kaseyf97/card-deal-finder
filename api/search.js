@@ -126,8 +126,9 @@ export default async function handler(req, res) {
       filters.push(`price:[..${maxPrice}]`);
     }
 
-    // Append exclusions to weed out sealed products, lots, base cards, chances, customs
-    const exclusions = '-lot -bundle -reprint -custom -fake -proxy -damaged -"base set" -"base card" -common -box -"hobby box" -"blaster box" -"hanger box" -"fat pack" -"retail box" -"case break" -"group break" -break -pack -sealed -case -"jumbo box" -chance -"random chance" -mystery -"block chaser" -chaser -slot -"random slot"';
+    // Append exclusions to weed out sealed products, lots, base cards, chances, customs.
+    // Use quoted phrases to avoid over-blocking (e.g. don't block "case hit", just "case break")
+    const exclusions = '-lot -bundle -reprint -custom -fake -proxy -damaged -"base set" -"base card" -"hobby box" -"blaster box" -"hanger box" -"fat pack" -"retail box" -"case break" -"group break" -"wax pack" -"sealed pack" -"sealed box" -"jumbo box" -chance -"random chance" -mystery -"block chaser" -chaser -"random slot"';
     const fullQuery = `${q.trim()} ${exclusions}`;
 
     // Build query params
