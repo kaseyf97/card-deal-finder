@@ -76,9 +76,10 @@ const BLOCKED_TITLE_WORDS = [
   'retail box', 'wax pack', 'jumbo box', 'jumbo pack', 'jumbo card', 'jumbo',
   'sealed box', 'sealed pack', 'sealed case', 'sealed wax',
   'oversize', 'oversized',
-  // Breaks
+  // Breaks & gambling listings
   'case break', 'group break', 'random break', 'live break', 'block chaser',
   'chaser pack', 'random slot', 'mystery box', 'mystery pack',
+  'your chance', 'win a', 'chance to', 'pick your',
   // Lots & bundles
   'lot of', ' lot ', 'bundle', 'complete set', 'base set',
   // Fakes & reprints
@@ -86,7 +87,7 @@ const BLOCKED_TITLE_WORDS = [
 ];
 
 // Words that must match as whole words only (to avoid blocking "breakthrough", "sandbox", etc.)
-const BLOCKED_WHOLE_WORDS = ['break', 'breaks', 'box', 'boxes', 'sealed'];
+const BLOCKED_WHOLE_WORDS = ['break', 'breaks', 'box', 'boxes', 'sealed', 'chance', 'random'];
 
 // Filter items whose titles contain any blocked keyword (case-insensitive)
 function filterByTitle(items) {
@@ -186,12 +187,15 @@ export default async function handler(req, res) {
 
     // nextOffset is based on raw items fetched (before filtering), not filtered count.
     // This is what eBay needs for the next page request.
+    // hasMore: true when eBay returned a full page (100), meaning more pages likely exist.
     const currentOffset = parseInt(offset || 0);
     const nextOffset = currentOffset + items.length;
+    const hasMore = items.length >= 100;
 
     return res.status(200).json({
       total: data.total || 0,
       nextOffset,
+      hasMore,
       items: finalItems
     });
 

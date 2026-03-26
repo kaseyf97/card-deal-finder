@@ -142,7 +142,10 @@ guidedSearchBtn.addEventListener('click', () => {
     const setInfo = (SETS_BY_SPORT[gSport] || []).find(s => s.id === gSet);
     if (setInfo) parts.push(setInfo.term);
   }
-  parts.push(gSport); // always include sport
+  // Only add sport as a keyword if no set was chosen (broad fallback).
+  // When a set is selected, the eBay category filter handles sport — adding the sport
+  // word to the query reduces results since sellers don't always use it in titles.
+  if (!gSet) parts.push(gSport);
 
   queryInput.value = parts.join(' ');
   sportSelect.value = gSport;
@@ -192,8 +195,8 @@ async function runSearch(append = false) {
         renderResults(data.items, searchState.total, q);
       }
       fetchAndApplyComps();
-      // Show Load More if eBay has more results beyond what we fetched
-      if (searchState.offset < searchState.total) {
+      // Show Load More when eBay returned a full page (meaning more pages exist)
+      if (data.hasMore) {
         showLoadMore();
       } else {
         hideLoadMore();
