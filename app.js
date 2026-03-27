@@ -160,6 +160,11 @@ async function runSearch(append = false) {
   const q = queryInput.value.trim();
   if (!q) return;
 
+  if (!sportSelect.value) {
+    showError('Please select a sport before searching.');
+    return;
+  }
+
   if (!append) {
     searchState = { q, maxPrice: maxPriceInput.value, sport: sportSelect.value, offset: 0, total: 0 };
     resultsGrid.innerHTML = '';
