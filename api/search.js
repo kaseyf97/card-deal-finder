@@ -88,7 +88,9 @@ const BLOCKED_TITLE_WORDS = [
   // Lots & bundles
   'lot of', ' lot ', 'bundle', 'complete set', 'base set',
   // Fakes & reprints
-  'reprint', 'custom card', 'fake', 'proxy'
+  'reprint', 'custom card', 'fake', 'proxy',
+  // Stickers & non-card products
+  'sticker', 'stickers', 'sticker pack', 'sticker album', 'sticker collection'
 ];
 
 // Words that must match as whole words only (to avoid blocking "breakthrough", "sandbox", etc.)
@@ -134,7 +136,7 @@ export default async function handler(req, res) {
     // Minimal exclusions — only the most obvious sealed products.
     // Keep this short so eBay returns maximum raw results; the server-side
     // title filter handles everything else precisely.
-    const exclusions = '-"hobby box" -"blaster box" -"case break" -"group break" -reprint -proxy';
+    const exclusions = '-"hobby box" -"blaster box" -"case break" -"group break" -reprint -proxy -sticker';
     const fullQuery = `${q.trim()} ${exclusions}`;
 
     // Build query params — limit 200 (eBay max) for more results to filter from
