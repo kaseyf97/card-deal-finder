@@ -146,10 +146,10 @@ export default async function handler(req, res) {
       offset: offset || '0'
     });
 
-    // Filter by sport category if specified
-    if (sport && SPORT_CATEGORIES[sport]) {
-      params.set('category_ids', SPORT_CATEGORIES[sport]);
-    }
+    // Always filter to sports card categories — use the specific sport if selected,
+    // otherwise include all three so non-card listings can't slip through.
+    const categoryId = SPORT_CATEGORIES[sport] || Object.values(SPORT_CATEGORIES).join(',');
+    params.set('category_ids', categoryId);
 
     const apiRes = await fetch(
       `https://api.ebay.com/buy/browse/v1/item_summary/search?${params}`,
